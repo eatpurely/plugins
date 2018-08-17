@@ -29,14 +29,15 @@ class Location {
   final double longitude;
   final double altitude;
   final double speed;
+  final double accuracy;
 
   Location(
-      this._time, this.latitude, this.longitude, this.altitude, this.speed);
+      this._time, this.latitude, this.longitude, this.altitude, this.speed, this.accuracy);
 
   factory Location.fromJson(String jsonLocation) {
     final Map<String, dynamic> location = json.decode(jsonLocation);
     return new Location(location['time'], location['latitude'],
-        location['longitude'], location['altitude'], location['speed']);
+        location['longitude'], location['altitude'], location['speed'], location['accuracy']);
   }
 
   DateTime get time =>
@@ -45,15 +46,16 @@ class Location {
 
   @override
   String toString() =>
-      '[$time] ($latitude, $longitude) altitude: $altitude m/s: $speed';
+      '[$time] ($latitude, $longitude) altitude: $altitude m/s: $speed accuracy: $accuracy';
 
   String toJson() {
-    final Map<String, double> location = <String, double>{
+    final Map<String, dynamic> location = <String, dynamic>{
       'time': _time,
       'latitude': latitude,
       'longitude': longitude,
       'altitude': altitude,
       'speed': speed,
+      'accuracy': accuracy,
     };
     return json.encode(location);
   }
@@ -98,7 +100,7 @@ void _backgroundCallbackDispatcher() {
     if (call.method == kOnLocationEvent) {
       onLocationEvent ??= _performCallbackLookup();
       final Location location =
-          new Location(args[1], args[2], args[3], args[4], args[5]);
+          new Location(args[1], args[2], args[3], args[4], args[5], args[6]);
       onLocationEvent(location);
     } else {
       assert(false, "No handler defined for method type: '${call.method}'");

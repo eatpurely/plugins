@@ -48,9 +48,12 @@ static LocationBackgroundPlugin *instance = nil;
       _locationManager.showsBackgroundLocationIndicator =
           [self getShowsBackgroundLocationIndicator];
     }
+    _locationManager.activityType = CLActivityTypeAutomotiveNavigation;
     _locationManager.allowsBackgroundLocationUpdates = YES;
+    _locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation;
+    _locationManager.distanceFilter = 10;
     // Finally, restart monitoring for location changes to get our location.
-    [self->_locationManager startMonitoringSignificantLocationChanges];
+    [self->_locationManager startUpdatingLocation];
   }
 
   // Note: if we return NO, this vetos the launch of the application.
@@ -195,12 +198,14 @@ static LocationBackgroundPlugin *instance = nil;
   if (@available(iOS 11.0, *)) {
     _locationManager.showsBackgroundLocationIndicator = arguments[2];
   }
-  _locationManager.activityType = [arguments[3] integerValue];
+  _locationManager.activityType = CLActivityTypeAutomotiveNavigation;
   _locationManager.allowsBackgroundLocationUpdates = YES;
+  _locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation;
+  _locationManager.distanceFilter = 10;
 
   [self setPausesLocationUpdatesAutomatically:_locationManager.pausesLocationUpdatesAutomatically];
   [self setShowsBackgroundLocationIndicator:_locationManager.showsBackgroundLocationIndicator];
-  [self->_locationManager startMonitoringSignificantLocationChanges];
+  [self->_locationManager startUpdatingLocation];
 }
 
 // Stop the location updates.
@@ -215,7 +220,7 @@ static LocationBackgroundPlugin *instance = nil;
                        arguments:@[
                          @(_onLocationUpdateHandle), @(location.timestamp.timeIntervalSince1970),
                          @(location.coordinate.latitude), @(location.coordinate.longitude),
-                         @(location.horizontalAccuracy), @(location.speed)
+                         @(location.altitude), @(location.speed), @(location.horizontalAccuracy)
                        ]];
 }
 
