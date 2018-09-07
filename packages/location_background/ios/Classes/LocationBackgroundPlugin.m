@@ -105,7 +105,7 @@ static LocationBackgroundPlugin *instance = nil;
 
   // This is the method channel used to communicate with the UI Isolate.
   _mainChannel =
-      [FlutterMethodChannel methodChannelWithName:@"plugins.flutter.io/ios_background_location"
+      [FlutterMethodChannel methodChannelWithName:@"plugins.flutter.io/background_location"
                                   binaryMessenger:[registrar messenger]];
   [registrar addMethodCallDelegate:self channel:_mainChannel];
 
@@ -115,7 +115,7 @@ static LocationBackgroundPlugin *instance = nil;
   // BinaryMessenger needs to be initialized first, which is done in
   // `startHeadlessService` below.
   _callbackChannel = [FlutterMethodChannel
-      methodChannelWithName:@"plugins.flutter.io/ios_background_location_callback"
+      methodChannelWithName:@"plugins.flutter.io/background_location_callback"
             binaryMessenger:_headlessRunner];
   return self;
 }

@@ -68,7 +68,7 @@ class Location {
 void _backgroundCallbackDispatcher() {
   const String kOnLocationEvent = 'onLocationEvent';
   const MethodChannel _channel =
-      MethodChannel('plugins.flutter.io/ios_background_location_callback');
+      MethodChannel('plugins.flutter.io/background_location_callback');
 
   // Setup Flutter state needed for MethodChannels.
   WidgetsFlutterBinding.ensureInitialized();
@@ -83,8 +83,7 @@ void _backgroundCallbackDispatcher() {
     final dynamic args = call.arguments;
 
     Function _performCallbackLookup() {
-      final CallbackHandle handle =
-          CallbackHandle.fromRawHandle(call.arguments[0]);
+      final CallbackHandle handle = CallbackHandle.fromRawHandle(call.arguments[0]);
 
       // PluginUtilities.getCallbackFromHandle performs a lookup based on the
       // handle we retrieved earlier.
@@ -112,7 +111,7 @@ class LocationBackgroundPlugin {
   // The method channel we'll use to communicate with the native portion of our
   // plugin.
   static const MethodChannel _channel =
-      MethodChannel('plugins.flutter.io/ios_background_location');
+      MethodChannel('plugins.flutter.io/background_location');
 
   static const String _kCancelLocationUpdates = 'cancelLocationUpdates';
   static const String _kMonitorLocationChanges = 'monitorLocationChanges';
@@ -130,11 +129,11 @@ class LocationBackgroundPlugin {
     // a callback managed by the Flutter engine, which allows for us to pass
     // references to our callbacks between isolates.
     print("Starting LocationBackgroundPlugin service");
-    final CallbackHandle handle =
-        PluginUtilities.getCallbackHandle(_backgroundCallbackDispatcher);
+
+    final CallbackHandle handle = PluginUtilities.getCallbackHandle(_backgroundCallbackDispatcher);
     assert(handle != null, 'Unable to lookup callback.');
-    _channel
-        .invokeMethod(_kStartHeadlessService, <dynamic>[handle.toRawHandle()]);
+
+    _channel.invokeMethod(_kStartHeadlessService, <dynamic>[handle.toRawHandle()]);
   }
 
   /// Start getting significant location updates through `callback`.
