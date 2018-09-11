@@ -16,6 +16,8 @@ import io.flutter.view.FlutterCallbackInformation;
 import io.flutter.view.FlutterMain;
 import io.flutter.view.FlutterNativeView;
 import io.flutter.view.FlutterRunArguments;
+
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class LocationBackgroundService extends Service {
@@ -24,6 +26,32 @@ public class LocationBackgroundService extends Service {
   private static FlutterNativeView sBackgroundFlutterView;
   private static MethodChannel sBackgroundChannel;
   private static PluginRegistrantCallback sPluginRegistrantCallback;
+  private static long sLocationCallbackHandle = -1;
+
+  private static LocationListener sLocationListener = new LocationListener() {
+    public void onLocationChanged(Location location) {
+      // Called when a new location is found by the network location provider.
+      Log.i(TAG, String.format("%f, %f", location.getLatitude(), location.getLongitude()));
+      if(sBackgroundChannel != null && sLocationCallbackHandle != -1) {
+        ArrayList arguments = new ArrayList();
+        arguments.add(sLocationCallbackHandle);
+        arguments.add(location.getTime()/1000.0); // iOS returns seconds since epoch so that's what we'll do
+        arguments.add(location.getLatitude());
+        arguments.add(location.getLongitude());
+        arguments.add(location.getAltitude());
+        arguments.add(location.getSpeed());
+        arguments.add(location.getAccuracy());
+
+        sBackgroundChannel.invokeMethod("onLocationEvent", arguments);
+      }
+    }
+
+    public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+    public void onProviderEnabled(String provider) {}
+
+    public void onProviderDisabled(String provider) {}
+  };
 
   private String mAppBundlePath;
 
@@ -52,29 +80,22 @@ public class LocationBackgroundService extends Service {
       args.libraryPath = cb.callbackLibraryPath;
       sBackgroundFlutterView.runFromBundle(args);
       sPluginRegistrantCallback.registerWith(sBackgroundFlutterView.getPluginRegistry());
+
     }
   }
 
-  public static void monitorLocationChanges(Context context) {
-    // Create an Intent for the alarm and set the desired Dart callback handle.
-//    Intent intent = new Intent(context, LocationBackgroundService.class);
-//    intent.putExtra("callbackHandle", callbackHandle);
-//    PendingIntent pendingIntent = PendingIntent.getService(context, requestCode, alarm, PendingIntent.FLAG_UPDATE_CURRENT);
+  public static void monitorLocationChanges(Context context, long callbackHandle) {
     LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-    LocationListener locationListener = new LocationListener() {
-      public void onLocationChanged(Location location) {
-        // Called when a new location is found by the network location provider.
-        Log.i(TAG, String.format("%f, %f", location.getLatitude(), location.getLongitude()));
-      }
 
-      public void onStatusChanged(String provider, int status, Bundle extras) {}
 
-      public void onProviderEnabled(String provider) {}
+    // These arguments match the iOS settings
+    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, sLocationListener);
+    sLocationCallbackHandle = callbackHandle;
+  }
 
-      public void onProviderDisabled(String provider) {}
-    };
-    // These match iOS
-    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
+  public static void cancelLocationUpdates(Context context) {
+    LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+    locationManager.removeUpdates(sLocationListener);
   }
 
   public static void setBackgroundChannel(MethodChannel channel) {
@@ -100,32 +121,6 @@ public class LocationBackgroundService extends Service {
     Context context = getApplicationContext();
     FlutterMain.ensureInitializationComplete(context, null);
     mAppBundlePath = FlutterMain.findAppBundlePath(context);
-  }
-
-  // This is where we handle alarm events before sending them to our callback
-  // dispatcher in Dart.
-  @Override
-  public int onStartCommand(Intent intent, int flags, int startId) {
-    if (!sStarted.get()) {
-      Log.i(TAG, "AlarmService has not yet started.");
-      // TODO(bkonyi): queue up alarm events.
-      return START_NOT_STICKY;
-    }
-    // Grab the handle for the callback associated with this alarm. Pay close
-    // attention to the type of the callback handle as storing this value in a
-    // variable of the wrong size will cause the callback lookup to fail.
-    long callbackHandle = intent.getLongExtra("callbackHandle", 0);
-    if (sBackgroundChannel == null) {
-      Log.e(
-      TAG,
-      "setBackgroundChannel was not called before alarms were scheduled." + " Bailing out.");
-      return START_NOT_STICKY;
-    }
-    // Handle the alarm event in Dart. Note that for this plugin, we don't
-    // care about the method name as we simply lookup and invoke the callback
-    // provided.
-    sBackgroundChannel.invokeMethod("", new Object[] {callbackHandle});
-    return START_NOT_STICKY;
   }
 
   @Override

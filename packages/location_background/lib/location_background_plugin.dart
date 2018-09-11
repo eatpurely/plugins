@@ -98,9 +98,15 @@ void _backgroundCallbackDispatcher() {
 
     if (call.method == kOnLocationEvent) {
       onLocationEvent ??= _performCallbackLookup();
-      final Location location =
-          new Location(args[1], args[2], args[3], args[4], args[5], args[6]);
-      onLocationEvent(location);
+
+      try {
+        final Location location = new Location(args[1], args[2], args[3], args[4], args[5], args[6]);
+        onLocationEvent(location);
+      } catch (e) {
+        print("CAUGHT");
+        print(e);
+      }
+
     } else {
       assert(false, "No handler defined for method type: '${call.method}'");
     }

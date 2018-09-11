@@ -55,7 +55,7 @@ public class LocationBackgroundPlugin implements MethodCallHandler, ViewDestroyL
       monitorLocationChanges(arguments);
       result.success(true);
     } else if (method.equals("cancelLocationUpdates")) {
-      cancelLocationUpdates(arguments);
+      cancelLocationUpdates();
       result.success(true);
     } else {
       result.notImplemented();
@@ -72,7 +72,7 @@ public class LocationBackgroundPlugin implements MethodCallHandler, ViewDestroyL
   private void monitorLocationChanges(ArrayList arguments) {
     if(hasLocationPermission()) {
       Log.i(TAG, "monitorLocationChanges " + Integer.toString(arguments.size()));
-      LocationBackgroundService.monitorLocationChanges(mContext);
+      LocationBackgroundService.monitorLocationChanges(mContext, (long)arguments.get(0));
     } else {
       // Store these so we can resume after we get permission
       mMonitorLocationArguments = arguments;
@@ -80,8 +80,9 @@ public class LocationBackgroundPlugin implements MethodCallHandler, ViewDestroyL
     }
   }
 
-  private void cancelLocationUpdates(ArrayList arguments) {
+  private void cancelLocationUpdates() {
     Log.i(TAG, "cancelLocationUpdates");
+    LocationBackgroundService.cancelLocationUpdates(mContext);
   }
 
   private boolean hasLocationPermission() {
@@ -93,7 +94,7 @@ public class LocationBackgroundPlugin implements MethodCallHandler, ViewDestroyL
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //      requestingPermission = true;
       mRegistrar.activity().requestPermissions(
-              new String[] {Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_ID);
+              new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_ID);
     }
   }
 
