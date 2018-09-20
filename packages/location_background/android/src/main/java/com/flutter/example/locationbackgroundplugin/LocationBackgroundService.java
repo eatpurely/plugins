@@ -87,13 +87,16 @@ public class LocationBackgroundService extends Service {
   public static void monitorLocationChanges(Context context, long callbackHandle) {
     LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 
-
+    Log.i(TAG, "Starting location updates");
     // These arguments match the iOS settings
     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, sLocationListener);
+    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 10, sLocationListener);
+    locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 5000, 10, sLocationListener);
     sLocationCallbackHandle = callbackHandle;
   }
 
   public static void cancelLocationUpdates(Context context) {
+    Log.i(TAG, "Stopping location updates");
     LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
     locationManager.removeUpdates(sLocationListener);
   }
