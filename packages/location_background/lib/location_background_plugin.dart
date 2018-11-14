@@ -122,6 +122,7 @@ class LocationBackgroundPlugin {
   static const String _kCancelLocationUpdates = 'cancelLocationUpdates';
   static const String _kMonitorLocationChanges = 'monitorLocationChanges';
   static const String _kStartHeadlessService = 'startHeadlessService';
+  static const String _kCheckPermissions = 'checkPermissions';
 
   bool pauseLocationUpdatesAutomatically;
   bool showsBackgroundLocationIndicator;
@@ -161,6 +162,7 @@ class LocationBackgroundPlugin {
   }
 
   /// Stop all location updates.
-  Future<void> cancelLocationUpdates() =>
-      _channel.invokeMethod(_kCancelLocationUpdates);
+  Future<void> cancelLocationUpdates() => _channel.invokeMethod(_kCancelLocationUpdates);
+
+  Future<void> checkPermissions() => _channel.invokeMethod(_kCheckPermissions);
 }

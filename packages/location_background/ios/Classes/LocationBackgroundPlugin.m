@@ -73,6 +73,9 @@ static LocationBackgroundPlugin *instance = nil;
     NSAssert(arguments.count == 0, @"Invalid argument count for 'cancelLocationUpdates'");
     [self stopUpdatingLocation];
     result(nil);
+  } else if ([@"checkPermissions" isEqualToString:call.method]) {
+    [self checkPermissions];
+    result(nil);
   } else {
     NSLog(@"Unknown method: %@\n", call.method);
     result(FlutterMethodNotImplemented);
@@ -211,6 +214,20 @@ static LocationBackgroundPlugin *instance = nil;
 // Stop the location updates.
 - (void)stopUpdatingLocation {
   [self->_locationManager stopUpdatingLocation];
+}
+
+// Make sure location permissions are enabled
+- (void)checkPermissions {
+  if ([CLLocationManager locationServicesEnabled]){
+    if ([CLLocationManager authorizationStatus] != kCLAuthorizationStatusAuthorizedAlways){
+      UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Location Access \"Always\" Required"
+      message:@"To re-enable, please go to Settings and set Location Access to Always for this app. This is required to provide accurate ETAs to our customers."
+      delegate:nil
+      cancelButtonTitle:@"OK"
+      otherButtonTitles:nil];
+      [alert show];
+    }
+  }
 }
 
 // Sends location events to our `_backgroundCallDispatcher` in Dart code via
