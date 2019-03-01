@@ -1,5 +1,8 @@
 # Flutter plugins
 
+## Eat Purely Usage
+This repo is a fork of https://github.com/flutter/plugins. The only plugin Eat Purely is using is the [location_background](https://github.com/eatpurely/plugins/tree/master/packages/location_background) for GPS tracking in the Flutter Driver App. This contains the Native Android and iOS code for interacting with the device GPS data.
+
 [![Build Status](https://travis-ci.org/flutter/plugins.svg?branch=master)](https://travis-ci.org/flutter/plugins)
 [![Build Status](https://api.cirrus-ci.com/github/flutter/plugins.svg)](https://cirrus-ci.com/github/flutter/plugins)
 
